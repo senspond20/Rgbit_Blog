@@ -8,6 +8,12 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/mod-common/data" />
+            <option value="$PROJECT_DIR$/mod-common/utils" />
+            <option value="$PROJECT_DIR$/mod-srv-admin/back" />
+            <option value="$PROJECT_DIR$/mod-srv-admin/front" />
+            <option value="$PROJECT_DIR$/mod-srv-public/back" />
+            <option value="$PROJECT_DIR$/mod-srv-public/front" />
           </set>
         </option>
       </GradleProjectSettings>

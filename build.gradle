@@ -1,19 +1,91 @@
-plugins {
-    id 'java'
+buildscript {
+    ext {
+        spring = "2.4.1"
+        boot = "org.springframework.boot"
+        lombok = "org.projectlombok:lombok"
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+        //maven { url "http://clojars.org/repo" }
+        maven {
+            url "https://repo.spring.io/release"
+        }
+        maven {
+            url "https://repository.jboss.org/maven2"
+        }
+    }
+    dependencies {
+        classpath("$boot:spring-boot-gradle-plugin:$spring")
+    }
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
+allprojects {
+    group = "com.rgbitsoft.blog"
+    version = "1.0.0"
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+subprojects {
+
+    apply plugin: "java"
+    apply plugin: 'groovy'
+    apply plugin: boot
+    apply plugin: "io.spring.dependency-management"
+    apply plugin: "idea"
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        developmentOnly
+        runtimeClasspath {
+            extendsFrom developmentOnly
+        }
+    }
+
+    dependencies {
+        developmentOnly("$boot:spring-boot-devtools")
+        implementation "$boot:spring-boot-starter"
+        implementation 'com.fasterxml.jackson.core:jackson-annotations'
+
+        compileOnly lombok
+        testCompileOnly lombok
+        annotationProcessor lombok
+        testAnnotationProcessor lombok
+
+        compile "org.slf4j:slf4j-api"
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testImplementation "$boot:spring-boot-starter-test"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+    task cleanGeneatedDir(type: Delete) {
+        delete file('src/main/generated')
+    }
 }
 
-test {
-    useJUnitPlatform()
+["mod-common"].each {
+    def subProjectDir = new File(projectDir, it)
+    subProjectDir.eachDir {dir->
+        def projectName = ":${it}-${dir.name}"
+        project(projectName){
+            bootJar.enabled(false)
+            jar.enabled(true)
+        }
+    }
 }
+["mod-srv-public", "mod-srv-admin"].each {
+    def subProjectDir = new File(projectDir, it)
+    subProjectDir.eachDir {dir->
+        def projectName = ":${it}-${dir.name}"
+        project(projectName){
+            bootJar.enabled(true)
+            jar.enabled(false)
+        }
+    }
+}
+
+help.enabled(false)

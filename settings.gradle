@@ -1,2 +1,47 @@
 rootProject.name = 'Rgbit_Blog'
+def archFolder = ["mod-common", "mod-srv-public","mod-srv-admin"];
 
+// --------------------------------------------------------------
+archFolder.each {
+    def compDir = new File(rootDir, it)
+    if(!compDir.exists()) compDir.mkdirs()
+
+    compDir.eachDir {subDir ->
+        def gradleFile = new File(subDir.absolutePath, "build.gradle")
+        if(!gradleFile.exists()){
+            gradleFile.text =
+                    """
+
+                    dependencies {
+
+                    }
+                    test {
+                       useJUnitPlatform()
+                    }
+                    
+                    """.stripIndent(20)
+        }
+        def sup = it.substring(it.lastIndexOf("-") + 1, it.length()).substring(0,3) + "." + subDir.name;
+        def packagePath = "com/rgbitsoft/blog/" + sup
+        // 패키지 자동생성
+        [
+                "src/main/java/" + packagePath,
+                "src/main/resources",
+                "src/test/java/" + packagePath,
+                "src/test/resources"
+        ].each {srcDir->
+            def srcFolder = new File(subDir.absolutePath, srcDir)
+            if(!srcFolder.exists()){
+                srcFolder.mkdirs()
+            }
+        }
+        def projectName = ":${it}-${subDir.name}";
+
+        println "[" + projectName + "]"
+        println it + " >> " +  packagePath.replaceAll('/','.')
+        println "========================================"
+
+        include projectName
+        project(projectName).projectDir = subDir
+    }
+}
